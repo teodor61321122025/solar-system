@@ -33,8 +33,6 @@
     throw new Error("Canvas context not supported.");
   }
 
-  console.log("Canvas initialized");
-
   let zoom = 0.2;
   let zeigeNamen = false;
   let zeitfaktor = 1;
@@ -109,11 +107,10 @@
     const centerX = width / 2;
     const centerY = height / 2;
 
-    // 🛠️ Force black background
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = 'black'; // Always paint background black
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Sonne
+    // Draw sun
     ctx.beginPath();
     ctx.arc(centerX, centerY, sonne.r * zoom, 0, Math.PI * 2);
     ctx.fillStyle = sonne.color;
@@ -151,7 +148,7 @@
         ctx.fillStyle = 'white';
         ctx.font = `${12}px sans-serif`;
         ctx.textAlign = 'center';
-        ctx.fillText(p.name || "Planet", screenX, screenY - 10);
+        ctx.fillText(p.name, screenX, screenY - 10);
       }
     }
 
@@ -161,6 +158,45 @@
   update();
 </script>
 
+<!-- Buttons -->
+<div style="position: fixed; top: 10px; left: 10px; color: white; font-family: sans-serif; z-index: 10;">
+  <button onclick="zeitfaktor /= 2">🐢 Langsamer</button>
+  <button onclick="zeitfaktor *= 2">⏩ Schneller</button>
+  <button onclick="pausiert = !pausiert">
+    ⏯️ <span id="pauseText">Pause</span>
+  </button>
+  <button onclick="zeigeNamen = !zeigeNamen">🔠 Namen & Umlaufbahnen</button>
+</div>
+
+<!-- Fullscreen -->
+<div style="position: fixed; top: 10px; right: 10px; z-index: 10;">
+  <button id="fullscreenBtn" onclick="toggleFullscreen()">🖥️ Vollbild</button>
+</div>
+
+<script>
+  function toggleFullscreen() {
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(err => {
+        alert("Vollbild-Fehler: " + err.message);
+      });
+    } else {
+      document.exitFullscreen?.();
+    }
+  }
+
+  function isiOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  if (isiOS()) {
+    document.getElementById('fullscreenBtn').style.display = 'none';
+  }
+
+  setInterval(() => {
+    document.getElementById('pauseText').textContent = pausiert ? 'Start' : 'Pause';
+  }, 100);
+</script>
 </body>
 </html>
 
