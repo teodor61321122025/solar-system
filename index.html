@@ -103,18 +103,19 @@
     return Math.sqrt(G * massZentrum / abstand);
   }
 
+  // Adjusted planet distances for more realistic scaling
   const planeten = [
-    { name: 'Merkur', x: 100, y: 0, vx: 0, vy: berechneOrbitSpeed(100, sonne.m), r: 9, m: 10, color: 'grey' },
-    { name: 'Venus', x: 150, y: 0, vx: 0, vy: berechneOrbitSpeed(150, sonne.m), r: 11, m: 20, color: 'orange' },
-    { name: 'Erde', x: 200, y: 0, vx: 0, vy: berechneOrbitSpeed(200, sonne.m), r: 14, m: 30, color: 'blue', moons: [
-      { name: 'Mond', x: 0, y: -50, vx: 0, vy: 0.1, r: 4, m: 0.1, color: 'gray' }
+    { name: 'Merkur', x: 57, y: 0, vx: 0, vy: berechneOrbitSpeed(57, sonne.m), r: 9, m: 10, color: 'grey' },
+    { name: 'Venus', x: 108, y: 0, vx: 0, vy: berechneOrbitSpeed(108, sonne.m), r: 11, m: 20, color: 'orange' },
+    { name: 'Erde', x: 150, y: 0, vx: 0, vy: berechneOrbitSpeed(150, sonne.m), r: 14, m: 30, color: 'blue', moons: [
+      { name: 'Mond', x: 0, y: -40, vx: 0, vy: 0.1, r: 4, m: 0.1, color: 'gray' }
     ] },
-    { name: 'Mars', x: 250, y: 0, vx: 0, vy: berechneOrbitSpeed(250, sonne.m), r: 11, m: 20, color: 'red' },
-    { name: 'Jupiter', x: 300, y: 0, vx: 0, vy: berechneOrbitSpeed(300, sonne.m), r: 24, m: 100, color: 'brown', rings: true },
-    { name: 'Saturn', x: 350, y: 0, vx: 0, vy: berechneOrbitSpeed(350, sonne.m), r: 21, m: 90, color: 'gold', rings: true },
-    { name: 'Uranus', x: 400, y: 0, vx: 0, vy: berechneOrbitSpeed(400, sonne.m), r: 15, m: 70, color: 'lightblue' },
-    { name: 'Neptun', x: 450, y: 0, vx: 0, vy: berechneOrbitSpeed(450, sonne.m), r: 18, m: 80, color: 'darkblue' },
-    { name: 'Pluto', x: 500, y: 0, vx: 0, vy: berechneOrbitSpeed(500, sonne.m), r: 10, m: 40, color: 'lightbrown' }
+    { name: 'Mars', x: 228, y: 0, vx: 0, vy: berechneOrbitSpeed(228, sonne.m), r: 11, m: 20, color: 'red' },
+    { name: 'Jupiter', x: 778, y: 0, vx: 0, vy: berechneOrbitSpeed(778, sonne.m), r: 24, m: 100, color: 'brown', rings: true },
+    { name: 'Saturn', x: 1427, y: 0, vx: 0, vy: berechneOrbitSpeed(1427, sonne.m), r: 21, m: 90, color: 'gold', rings: true },
+    { name: 'Uranus', x: 2871, y: 0, vx: 0, vy: berechneOrbitSpeed(2871, sonne.m), r: 15, m: 70, color: 'lightblue' },
+    { name: 'Neptun', x: 4495, y: 0, vx: 0, vy: berechneOrbitSpeed(4495, sonne.m), r: 18, m: 80, color: 'darkblue' },
+    { name: 'Pluto', x: 5913, y: 0, vx: 0, vy: berechneOrbitSpeed(5913, sonne.m), r: 10, m: 40, color: 'lightbrown' }
   ];
 
   canvas.addEventListener('wheel', e => {
@@ -267,6 +268,7 @@
       }
     }
 
+    // Clicking on a planet does not change the color anymore
     fokusPlanet = (found === fokusPlanet) ? null : found;
   });
 
