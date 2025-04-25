@@ -9,11 +9,12 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: black;
+      background: black; /* Ensure body background is black */
       touch-action: manipulation;
     }
     canvas {
       display: block;
+      background: black; /* Ensure canvas background is black */
     }
     button {
       margin: 2px;
@@ -50,6 +51,10 @@
     canvas.style.height = height + 'px';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
+
+    // Force background color to black on resize
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, width, height); // Ensure canvas background is black
   }
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
