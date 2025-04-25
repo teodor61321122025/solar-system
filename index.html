@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Sonnensystem mit Ringen und Bahnen</title>
+  <title>Sonnensystem</title>
   <style>
     html, body {
       margin: 0;
@@ -11,49 +11,18 @@
       overflow: hidden;
       background: black;
       touch-action: manipulation;
-      font-family: Arial, sans-serif;
     }
     canvas {
       display: block;
     }
-    .button-container {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
     button {
-      background-color: #333;
-      color: white;
-      border: none;
-      padding: 8px 12px;
+      margin: 2px;
       font-size: 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 120px;
-    }
-    button:hover {
-      background-color: #555;
-    }
-    button:active {
-      background-color: #777;
     }
   </style>
 </head>
 <body>
 <canvas id="welt"></canvas>
-
-<div class="button-container">
-  <button id="pauseButton">⏸️ Pause</button>
-  <button id="showNamesButton">📝 Namen</button>
-  <button id="speedUpButton">⏩ Schnell</button>
-  <button id="slowDownButton">⏪ Langsam</button>
-  <button id="showOrbitsButton">🌀 Orbits</button>
-</div>
 
 <script>
   const canvas = document.getElementById('welt');
@@ -68,14 +37,8 @@
   let zeigeNamen = false;
   let zeitfaktor = 1;
   let pausiert = false;
-  let showOrbits = false;
-  let fokusPlanet = null;
   const G = 0.01;
-  let cameraX = 0;
-  let cameraY = 0;
-  let cameraZoom = zoom;
 
-  // Resize canvas
   function resizeCanvas() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const width = window.innerWidth;
@@ -90,7 +53,6 @@
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
-  // Zoom initialization
   function initZoom() {
     const w = window.innerWidth;
     zoom = w < 500 ? 0.08 : w < 800 ? 0.12 : 0.2;
@@ -103,25 +65,22 @@
     return Math.sqrt(G * massZentrum / abstand);
   }
 
-  // Adjusted planet distances for more realistic scaling
   const planeten = [
-    { name: 'Merkur', x: 57, y: 0, vx: 0, vy: berechneOrbitSpeed(57, sonne.m), r: 9, m: 10, color: 'grey' },
-    { name: 'Venus', x: 108, y: 0, vx: 0, vy: berechneOrbitSpeed(108, sonne.m), r: 11, m: 20, color: 'orange' },
-    { name: 'Erde', x: 150, y: 0, vx: 0, vy: berechneOrbitSpeed(150, sonne.m), r: 14, m: 30, color: 'blue', moons: [
-      { name: 'Mond', x: 0, y: -40, vx: 0, vy: 0.1, r: 4, m: 0.1, color: 'gray' }
-    ] },
-    { name: 'Mars', x: 228, y: 0, vx: 0, vy: berechneOrbitSpeed(228, sonne.m), r: 11, m: 20, color: 'red' },
-    { name: 'Jupiter', x: 778, y: 0, vx: 0, vy: berechneOrbitSpeed(778, sonne.m), r: 24, m: 100, color: 'brown', rings: true },
-    { name: 'Saturn', x: 1427, y: 0, vx: 0, vy: berechneOrbitSpeed(1427, sonne.m), r: 21, m: 90, color: 'gold', rings: true },
-    { name: 'Uranus', x: 2871, y: 0, vx: 0, vy: berechneOrbitSpeed(2871, sonne.m), r: 15, m: 70, color: 'lightblue' },
-    { name: 'Neptun', x: 4495, y: 0, vx: 0, vy: berechneOrbitSpeed(4495, sonne.m), r: 18, m: 80, color: 'darkblue' },
-    { name: 'Pluto', x: 5913, y: 0, vx: 0, vy: berechneOrbitSpeed(5913, sonne.m), r: 10, m: 40, color: 'lightbrown' }
+    { name: 'Merkur', x: 400, y: 0, vx: 0, vy: berechneOrbitSpeed(400, sonne.m), r: 9, m: 10, color: 'grey' },
+    { name: 'Venus', x: 560, y: 0, vx: 0, vy: berechneOrbitSpeed(560, sonne.m), r: 11, m: 20, color: 'orange' },
+    { name: 'Erde', x: 760, y: 0, vx: 0, vy: berechneOrbitSpeed(760, sonne.m), r: 14, m: 30, color: 'blue' },
+    { name: 'Mars', x: 1000, y: 0, vx: 0, vy: berechneOrbitSpeed(1000, sonne.m), r: 11, m: 20, color: 'red' },
+    { name: 'Jupiter', x: 1300, y: 0, vx: 0, vy: berechneOrbitSpeed(1300, sonne.m), r: 24, m: 100, color: 'brown' },
+    { name: 'Saturn', x: 1650, y: 0, vx: 0, vy: berechneOrbitSpeed(1650, sonne.m), r: 21, m: 90, color: 'brown' },
+    { name: 'Uranus', x: 2100, y: 0, vx: 0, vy: berechneOrbitSpeed(2100, sonne.m), r: 15, m: 70, color: 'blue' },
+    { name: 'Neptun', x: 2600, y: 0, vx: 0, vy: berechneOrbitSpeed(2600, sonne.m), r: 18, m: 80, color: 'blue' },
+    { name: 'Pluto', x: 3200, y: 0, vx: 0, vy: berechneOrbitSpeed(3200, sonne.m), r: 10, m: 40, color: 'orange' }
   ];
 
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
     zoom += (e.deltaY > 0 ? -0.01 : 0.01) * zoom;
-    zoom = Math.max(0.02, Math.min(zoom, 2)); // Clamp zoom value
+    zoom = Math.max(0.02, Math.min(zoom, 2));
   }, { passive: false });
 
   let lastDist = null;
@@ -134,7 +93,7 @@
       if (lastDist !== null) {
         const zoomChange = (dist - lastDist) * 0.001;
         zoom += zoomChange * zoom;
-        zoom = Math.max(0.02, Math.min(zoom, 2)); // Clamp zoom value
+        zoom = Math.max(0.02, Math.min(zoom, 2));
       }
       lastDist = dist;
     }
@@ -142,40 +101,21 @@
 
   canvas.addEventListener('touchend', () => lastDist = null);
 
-  // Smooth camera transition
-  function updateCamera(targetX, targetY) {
-    const speed = 0.05;
-    cameraX += (targetX - cameraX) * speed;
-    cameraY += (targetY - cameraY) * speed;
-    cameraZoom += (zoom - cameraZoom) * speed;
-  }
-
-  // Update function with smooth transitions, moons, and rings
   function update() {
-    if (pausiert) return requestAnimationFrame(update);
-
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const screenCenterX = width / 2;
-    const screenCenterY = height / 2;
+    const centerX = width / 2;
+    const centerY = height / 2;
 
-    // Update camera position and zoom smoothly
-    if (fokusPlanet) {
-      updateCamera(fokusPlanet.x * zoom, fokusPlanet.y * zoom);
-    }
-
-    const centerX = screenCenterX + cameraX;
-    const centerY = screenCenterY + cameraY;
-
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = 'black'; // Always paint background black
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Draw sun
     ctx.beginPath();
-    ctx.arc(centerX, centerY, sonne.r * cameraZoom, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, sonne.r * zoom, 0, Math.PI * 2);
     ctx.fillStyle = sonne.color;
     ctx.fill();
 
-    // Loop through planets and moons
     for (let p of planeten) {
       if (!pausiert) {
         const dx = 0 - p.x;
@@ -190,118 +130,72 @@
         p.y += p.vy * zeitfaktor;
       }
 
-      const screenX = centerX + p.x * cameraZoom;
-      const screenY = centerY + p.y * cameraZoom;
+      const screenX = centerX + p.x * zoom;
+      const screenY = centerY + p.y * zoom;
 
-      // Draw orbit line
-      if (showOrbits) {
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, Math.sqrt(p.x * p.x + p.y * p.y) * cameraZoom, 0, Math.PI * 2);
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = 0.5;  // Even thinner orbit line
-        ctx.stroke();
-      }
-
-      // Draw planet
       ctx.beginPath();
-      ctx.arc(screenX, screenY, p.r * cameraZoom, 0, Math.PI * 2);
+      ctx.arc(screenX, screenY, p.r * zoom, 0, Math.PI * 2);
       ctx.fillStyle = p.color;
       ctx.fill();
 
-      // Draw rings (if the planet has them)
-      if (p.rings) {
-        ctx.beginPath();
-        ctx.ellipse(screenX, screenY, p.r * 2 * cameraZoom, p.r * 1.5 * cameraZoom, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = 'lightgray';
-        ctx.lineWidth = 3;  // More realistic ring thickness
-        ctx.stroke();
-      }
-
-      // Draw Moons
-      if (p.moons) {
-        for (let m of p.moons) {
-          const dx = p.x - m.x;
-          const dy = p.y - m.y;
-          const r = Math.sqrt(dx * dx + dy * dy);
-          const F = G * p.m * m.m / (r * r);
-          const ax = F * dx / r / m.m;
-          const ay = F * dy / r / m.m;
-          m.vx += ax * zeitfaktor;
-          m.vy += ay * zeitfaktor;
-          m.x += m.vx * zeitfaktor;
-          m.y += m.vy * zeitfaktor;
-
-          const moonX = screenX + m.x * cameraZoom;
-          const moonY = screenY + m.y * cameraZoom;
-
-          ctx.beginPath();
-          ctx.arc(moonX, moonY, m.r * cameraZoom, 0, Math.PI * 2);
-          ctx.fillStyle = m.color;
-          ctx.fill();
-        }
-      }
-
       if (zeigeNamen) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, Math.sqrt(p.x * p.x + p.y * p.y) * zoom, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
         ctx.fillStyle = 'white';
-        ctx.font = `${12 * cameraZoom}px sans-serif`;
+        ctx.font = `${12}px sans-serif`;
         ctx.textAlign = 'center';
-        ctx.fillText(p.name || "Planet", screenX, screenY - 10);
+        ctx.fillText(p.name, screenX, screenY - 10);
       }
     }
 
     requestAnimationFrame(update);
   }
 
-  canvas.addEventListener('click', e => {
-    const rect = canvas.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const clickY = e.clientY - rect.top;
-
-    let found = null;
-    for (let p of planeten) {
-      const px = (screenCenterX + p.x * cameraZoom) - clickX;
-      const py = (screenCenterY + p.y * cameraZoom) - clickY;
-      const dist = Math.sqrt(px * px + py * py);
-      if (dist < p.r * cameraZoom + 5) {
-        found = p;
-        break;
-      }
-    }
-
-    // Clicking on a planet does not change the color anymore
-    fokusPlanet = (found === fokusPlanet) ? null : found;
-  });
-
-  // Pause button functionality
-  document.getElementById('pauseButton').addEventListener('click', () => {
-    pausiert = !pausiert;
-    document.getElementById('pauseButton').textContent = pausiert ? '▶️ Fortsetzen' : '⏸️ Pause';
-  });
-
-  // Speed Up button
-  document.getElementById('speedUpButton').addEventListener('click', () => {
-    zeitfaktor *= 1.3;  // Increase speed by 30%
-  });
-
-  // Slow Down button
-  document.getElementById('slowDownButton').addEventListener('click', () => {
-    zeitfaktor *= 0.7;  // Decrease speed by 30%
-  });
-
-  // Show Orbits button
-  document.getElementById('showOrbitsButton').addEventListener('click', () => {
-    showOrbits = !showOrbits;
-    document.getElementById('showOrbitsButton').textContent = showOrbits ? '❌ Orbits' : '🌀 Orbits';
-  });
-
-  // Show Names button
-  document.getElementById('showNamesButton').addEventListener('click', () => {
-    zeigeNamen = !zeigeNamen;
-    document.getElementById('showNamesButton').textContent = zeigeNamen ? '📝 Keine Namen' : '📝 Namen';
-  });
-
   update();
 </script>
 
+<!-- Buttons -->
+<div style="position: fixed; top: 10px; left: 10px; color: white; font-family: sans-serif; z-index: 10;">
+  <button onclick="zeitfaktor /= 2">🐢 Langsamer</button>
+  <button onclick="zeitfaktor *= 2">⏩ Schneller</button>
+  <button onclick="pausiert = !pausiert">
+    ⏯️ <span id="pauseText">Pause</span>
+  </button>
+  <button onclick="zeigeNamen = !zeigeNamen">🔠 Namen & Umlaufbahnen</button>
+</div>
+
+<!-- Fullscreen -->
+<div style="position: fixed; top: 10px; right: 10px; z-index: 10;">
+  <button id="fullscreenBtn" onclick="toggleFullscreen()">🖥️ Vollbild</button>
+</div>
+
+<script>
+  function toggleFullscreen() {
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(err => {
+        alert("Vollbild-Fehler: " + err.message);
+      });
+    } else {
+      document.exitFullscreen?.();
+    }
+  }
+
+  function isiOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  if (isiOS()) {
+    document.getElementById('fullscreenBtn').style.display = 'none';
+  }
+
+  setInterval(() => {
+    document.getElementById('pauseText').textContent = pausiert ? 'Start' : 'Pause';
+  }, 100);
+</script>
 </body>
 </html>
