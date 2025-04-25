@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
@@ -16,13 +16,22 @@
       display: block;
     }
     button {
-      margin: 2px;
-      font-size: 14px;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 16px;
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
 <canvas id="welt"></canvas>
+<button id="pauseButton">⏸️ Pause</button>
 
 <script>
   const canvas = document.getElementById('welt');
@@ -43,6 +52,7 @@
   let cameraY = 0;
   let cameraZoom = zoom;
 
+  // Resize canvas
   function resizeCanvas() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const width = window.innerWidth;
@@ -54,15 +64,14 @@
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
   }
-
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
+  // Zoom initialization
   function initZoom() {
     const w = window.innerWidth;
     zoom = w < 500 ? 0.08 : w < 800 ? 0.12 : 0.2;
   }
-
   initZoom();
 
   const sonne = { r: 100, m: 1989000, color: 'yellow' };
@@ -217,10 +226,15 @@
     fokusPlanet = (found === fokusPlanet) ? null : found;
   });
 
+  // Pause button functionality
+  document.getElementById('pauseButton').addEventListener('click', () => {
+    pausiert = !pausiert;
+    document.getElementById('pauseButton').textContent = pausiert ? '▶️ Resume' : '⏸️ Pause';
+  });
+
   update();
 </script>
 
 </body>
 </html>
-
 
