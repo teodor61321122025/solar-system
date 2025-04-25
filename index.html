@@ -104,17 +104,17 @@
   }
 
   const planeten = [
-    { name: 'Merkur', x: 400, y: 0, vx: 0, vy: berechneOrbitSpeed(400, sonne.m), r: 9, m: 10, color: 'grey' },
-    { name: 'Venus', x: 560, y: 0, vx: 0, vy: berechneOrbitSpeed(560, sonne.m), r: 11, m: 20, color: 'orange' },
-    { name: 'Erde', x: 760, y: 0, vx: 0, vy: berechneOrbitSpeed(760, sonne.m), r: 14, m: 30, color: 'blue', moons: [
-      { name: 'Mond', x: 0, y: -150, vx: 0, vy: 0.1, r: 4, m: 0.1, color: 'gray' }
+    { name: 'Merkur', x: 100, y: 0, vx: 0, vy: berechneOrbitSpeed(100, sonne.m), r: 9, m: 10, color: 'grey' },
+    { name: 'Venus', x: 150, y: 0, vx: 0, vy: berechneOrbitSpeed(150, sonne.m), r: 11, m: 20, color: 'orange' },
+    { name: 'Erde', x: 200, y: 0, vx: 0, vy: berechneOrbitSpeed(200, sonne.m), r: 14, m: 30, color: 'blue', moons: [
+      { name: 'Mond', x: 0, y: -50, vx: 0, vy: 0.1, r: 4, m: 0.1, color: 'gray' }
     ] },
-    { name: 'Mars', x: 1000, y: 0, vx: 0, vy: berechneOrbitSpeed(1000, sonne.m), r: 11, m: 20, color: 'red' },
-    { name: 'Jupiter', x: 1300, y: 0, vx: 0, vy: berechneOrbitSpeed(1300, sonne.m), r: 24, m: 100, color: 'brown', rings: true },
-    { name: 'Saturn', x: 1650, y: 0, vx: 0, vy: berechneOrbitSpeed(1650, sonne.m), r: 21, m: 90, color: 'gold', rings: true },
-    { name: 'Uranus', x: 2100, y: 0, vx: 0, vy: berechneOrbitSpeed(2100, sonne.m), r: 15, m: 70, color: 'blue' },
-    { name: 'Neptun', x: 2600, y: 0, vx: 0, vy: berechneOrbitSpeed(2600, sonne.m), r: 18, m: 80, color: 'blue' },
-    { name: 'Pluto', x: 3200, y: 0, vx: 0, vy: berechneOrbitSpeed(3200, sonne.m), r: 10, m: 40, color: 'orange' }
+    { name: 'Mars', x: 250, y: 0, vx: 0, vy: berechneOrbitSpeed(250, sonne.m), r: 11, m: 20, color: 'red' },
+    { name: 'Jupiter', x: 300, y: 0, vx: 0, vy: berechneOrbitSpeed(300, sonne.m), r: 24, m: 100, color: 'brown', rings: true },
+    { name: 'Saturn', x: 350, y: 0, vx: 0, vy: berechneOrbitSpeed(350, sonne.m), r: 21, m: 90, color: 'gold', rings: true },
+    { name: 'Uranus', x: 400, y: 0, vx: 0, vy: berechneOrbitSpeed(400, sonne.m), r: 15, m: 70, color: 'lightblue' },
+    { name: 'Neptun', x: 450, y: 0, vx: 0, vy: berechneOrbitSpeed(450, sonne.m), r: 18, m: 80, color: 'darkblue' },
+    { name: 'Pluto', x: 500, y: 0, vx: 0, vy: berechneOrbitSpeed(500, sonne.m), r: 10, m: 40, color: 'lightbrown' }
   ];
 
   canvas.addEventListener('wheel', e => {
@@ -197,7 +197,7 @@
         ctx.beginPath();
         ctx.arc(centerX, centerY, Math.sqrt(p.x * p.x + p.y * p.y) * cameraZoom, 0, Math.PI * 2);
         ctx.strokeStyle = 'white';
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 0.5;  // Even thinner orbit line
         ctx.stroke();
       }
 
@@ -210,9 +210,9 @@
       // Draw rings (if the planet has them)
       if (p.rings) {
         ctx.beginPath();
-        ctx.ellipse(screenX, screenY, p.r * 2 * cameraZoom, p.r * 1.2 * cameraZoom, 0, 0, Math.PI * 2);
+        ctx.ellipse(screenX, screenY, p.r * 2 * cameraZoom, p.r * 1.5 * cameraZoom, 0, 0, Math.PI * 2);
         ctx.strokeStyle = 'lightgray';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;  // More realistic ring thickness
         ctx.stroke();
       }
 
