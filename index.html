@@ -34,7 +34,7 @@
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.3s ease;
-      width: 140px;
+      width: 120px;
     }
     button:hover {
       background-color: #555;
@@ -49,9 +49,10 @@
 
 <div class="button-container">
   <button id="pauseButton">⏸️ Pause</button>
-  <button id="showNamesButton">📝 Namen anzeigen</button>
-  <button id="speedUpButton">⏩ Geschwindigkeit erhöhen</button>
-  <button id="slowDownButton">⏪ Geschwindigkeit verringern</button>
+  <button id="showNamesButton">📝 Namen</button>
+  <button id="speedUpButton">⏩ Schnell</button>
+  <button id="slowDownButton">⏪ Langsam</button>
+  <button id="showOrbitsButton">🌀 Orbits</button>
 </div>
 
 <script>
@@ -67,6 +68,7 @@
   let zeigeNamen = false;
   let zeitfaktor = 1;
   let pausiert = false;
+  let showOrbits = false;
   let fokusPlanet = null;
   const G = 0.01;
   let cameraX = 0;
@@ -191,11 +193,13 @@
       const screenY = centerY + p.y * cameraZoom;
 
       // Draw orbit line
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, Math.sqrt(p.x * p.x + p.y * p.y) * cameraZoom, 0, Math.PI * 2);
-      ctx.strokeStyle = 'white';
-      ctx.setLineDash([5, 5]);
-      ctx.stroke();
+      if (showOrbits) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, Math.sqrt(p.x * p.x + p.y * p.y) * cameraZoom, 0, Math.PI * 2);
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
 
       // Draw planet
       ctx.beginPath();
@@ -282,10 +286,16 @@
     zeitfaktor *= 0.7;  // Decrease speed by 30%
   });
 
+  // Show Orbits button
+  document.getElementById('showOrbitsButton').addEventListener('click', () => {
+    showOrbits = !showOrbits;
+    document.getElementById('showOrbitsButton').textContent = showOrbits ? '❌ Orbits' : '🌀 Orbits';
+  });
+
   // Show Names button
   document.getElementById('showNamesButton').addEventListener('click', () => {
     zeigeNamen = !zeigeNamen;
-    document.getElementById('showNamesButton').textContent = zeigeNamen ? '📝 Namen ausblenden' : '📝 Namen anzeigen';
+    document.getElementById('showNamesButton').textContent = zeigeNamen ? '📝 Keine Namen' : '📝 Namen';
   });
 
   update();
