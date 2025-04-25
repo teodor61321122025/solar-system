@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Sonnensystem mit Monden</title>
+  <title>Sonnensystem mit Ringen und Bahnen</title>
   <style>
     html, body {
       margin: 0;
@@ -41,9 +41,6 @@
     }
     button:active {
       background-color: #777;
-    }
-    .button-container button:last-child {
-      margin-bottom: 0;
     }
   </style>
 </head>
@@ -111,8 +108,8 @@
       { name: 'Mond', x: 0, y: -150, vx: 0, vy: 0.1, r: 4, m: 0.1, color: 'gray' }
     ] },
     { name: 'Mars', x: 1000, y: 0, vx: 0, vy: berechneOrbitSpeed(1000, sonne.m), r: 11, m: 20, color: 'red' },
-    { name: 'Jupiter', x: 1300, y: 0, vx: 0, vy: berechneOrbitSpeed(1300, sonne.m), r: 24, m: 100, color: 'brown' },
-    { name: 'Saturn', x: 1650, y: 0, vx: 0, vy: berechneOrbitSpeed(1650, sonne.m), r: 21, m: 90, color: 'brown' },
+    { name: 'Jupiter', x: 1300, y: 0, vx: 0, vy: berechneOrbitSpeed(1300, sonne.m), r: 24, m: 100, color: 'brown', rings: true },
+    { name: 'Saturn', x: 1650, y: 0, vx: 0, vy: berechneOrbitSpeed(1650, sonne.m), r: 21, m: 90, color: 'gold', rings: true },
     { name: 'Uranus', x: 2100, y: 0, vx: 0, vy: berechneOrbitSpeed(2100, sonne.m), r: 15, m: 70, color: 'blue' },
     { name: 'Neptun', x: 2600, y: 0, vx: 0, vy: berechneOrbitSpeed(2600, sonne.m), r: 18, m: 80, color: 'blue' },
     { name: 'Pluto', x: 3200, y: 0, vx: 0, vy: berechneOrbitSpeed(3200, sonne.m), r: 10, m: 40, color: 'orange' }
@@ -150,7 +147,7 @@
     cameraZoom += (zoom - cameraZoom) * speed;
   }
 
-  // Update function with smooth transitions and moons
+  // Update function with smooth transitions, moons, and rings
   function update() {
     if (pausiert) return requestAnimationFrame(update);
 
@@ -193,10 +190,27 @@
       const screenX = centerX + p.x * cameraZoom;
       const screenY = centerY + p.y * cameraZoom;
 
+      // Draw orbit line
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, Math.sqrt(p.x * p.x + p.y * p.y) * cameraZoom, 0, Math.PI * 2);
+      ctx.strokeStyle = 'white';
+      ctx.setLineDash([5, 5]);
+      ctx.stroke();
+
+      // Draw planet
       ctx.beginPath();
       ctx.arc(screenX, screenY, p.r * cameraZoom, 0, Math.PI * 2);
       ctx.fillStyle = p.color;
       ctx.fill();
+
+      // Draw rings (if the planet has them)
+      if (p.rings) {
+        ctx.beginPath();
+        ctx.ellipse(screenX, screenY, p.r * 2 * cameraZoom, p.r * 1.2 * cameraZoom, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = 'lightgray';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
 
       // Draw Moons
       if (p.moons) {
@@ -279,4 +293,3 @@
 
 </body>
 </html>
-
