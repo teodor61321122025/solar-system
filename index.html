@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
@@ -52,9 +52,11 @@
 
 <div class="button-container">
   <button id="pauseButton">⏸️ Pause</button>
-  <button id="zoomInButton">🔍 Zoom In</button>
-  <button id="zoomOutButton">🔍 Zoom Out</button>
-  <button id="showNamesButton">📝 Show Names</button>
+  <button id="zoomInButton">🔍 Hineinzoomen</button>
+  <button id="zoomOutButton">🔍 Herauszoomen</button>
+  <button id="showNamesButton">📝 Namen anzeigen</button>
+  <button id="speedUpButton">⏩ Geschwindigkeit erhöhen</button>
+  <button id="slowDownButton">⏪ Geschwindigkeit verringern</button>
 </div>
 
 <script>
@@ -121,7 +123,7 @@
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
     zoom += (e.deltaY > 0 ? -0.01 : 0.01) * zoom;
-    zoom = Math.max(0.02, Math.min(zoom, 2));
+    zoom = Math.max(0.02, Math.min(zoom, 2)); // Clamp zoom value
   }, { passive: false });
 
   let lastDist = null;
@@ -134,7 +136,7 @@
       if (lastDist !== null) {
         const zoomChange = (dist - lastDist) * 0.001;
         zoom += zoomChange * zoom;
-        zoom = Math.max(0.02, Math.min(zoom, 2));
+        zoom = Math.max(0.02, Math.min(zoom, 2)); // Clamp zoom value
       }
       lastDist = dist;
     }
@@ -253,7 +255,7 @@
   // Pause button functionality
   document.getElementById('pauseButton').addEventListener('click', () => {
     pausiert = !pausiert;
-    document.getElementById('pauseButton').textContent = pausiert ? '▶️ Resume' : '⏸️ Pause';
+    document.getElementById('pauseButton').textContent = pausiert ? '▶️ Fortsetzen' : '⏸️ Pause';
   });
 
   // Zoom In button
@@ -269,10 +271,21 @@
   // Show Names button
   document.getElementById('showNamesButton').addEventListener('click', () => {
     zeigeNamen = !zeigeNamen;
-    document.getElementById('showNamesButton').textContent = zeigeNamen ? '📝 Hide Names' : '📝 Show Names';
+    document.getElementById('showNamesButton').textContent = zeigeNamen ? '📝 Namen ausblenden' : '📝 Namen anzeigen';
+  });
+
+  // Speed Up button
+  document.getElementById('speedUpButton').addEventListener('click', () => {
+    zeitfaktor *= 1.2;  // Increase speed by 20%
+  });
+
+  // Slow Down button
+  document.getElementById('slowDownButton').addEventListener('click', () => {
+    zeitfaktor *= 0.8;  // Decrease speed by 20%
   });
 
   update();
 </script>
+
 </body>
 </html>
