@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Sonnensystem mit Ringen und Monden</title>
+  <title>Sonnensystem</title>
   <style>
     html, body {
       margin: 0;
@@ -18,6 +18,16 @@
     button {
       margin: 2px;
       font-size: 14px;
+      background-color: #222;
+      color: white;
+      border: 1px solid #444;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: sans-serif;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #333;
     }
   </style>
 </head>
@@ -29,7 +39,7 @@
   const ctx = canvas.getContext('2d');
 
   if (!ctx) {
-    alert("Fehler: Canvas konnte nicht initialisiert werden. Bitte in Safari oder Chrome öffnen.");
+    alert("Fehler: Canvas konnte nicht initialisiert werden.");
     throw new Error("Canvas context not supported.");
   }
 
@@ -70,10 +80,10 @@
     { name: 'Venus', x: 560, y: 0, vx: 0, vy: berechneOrbitSpeed(560, sonne.m), r: 11, m: 20, color: 'orange' },
     { name: 'Erde', x: 760, y: 0, vx: 0, vy: berechneOrbitSpeed(760, sonne.m), r: 14, m: 30, color: 'blue' },
     { name: 'Mars', x: 1000, y: 0, vx: 0, vy: berechneOrbitSpeed(1000, sonne.m), r: 11, m: 20, color: 'red' },
-    { name: 'Jupiter', x: 1300, y: 0, vx: 0, vy: berechneOrbitSpeed(1300, sonne.m), r: 24, m: 100, color: 'brown', rings: { radius: 1300, width: 10, color: 'rgba(255, 0, 0, 0.5)' }, moons: [{ name: 'Io', x: 50, y: 0, r: 1, color: 'yellow' }, { name: 'Europa', x: 70, y: 0, r: 1, color: 'white' }] },
-    { name: 'Saturn', x: 1650, y: 0, vx: 0, vy: berechneOrbitSpeed(1650, sonne.m), r: 21, m: 90, color: 'goldenrod', rings: { radius: 1650, width: 20, color: 'rgba(255, 255, 255, 0.7)' }, moons: [{ name: 'Titan', x: 150, y: 0, r: 3, color: 'orange' }] },
-    { name: 'Uranus', x: 2100, y: 0, vx: 0, vy: berechneOrbitSpeed(2100, sonne.m), r: 15, m: 70, color: 'lightblue', rings: { radius: 2100, width: 5, color: 'rgba(0, 0, 255, 0.5)' }, moons: [{ name: 'Miranda', x: 30, y: 0, r: 1, color: 'grey' }] },
-    { name: 'Neptun', x: 2600, y: 0, vx: 0, vy: berechneOrbitSpeed(2600, sonne.m), r: 18, m: 80, color: 'blue', rings: { radius: 2600, width: 5, color: 'rgba(0, 0, 255, 0.5)' }, moons: [{ name: 'Triton', x: 40, y: 0, r: 2, color: 'white' }] },
+    { name: 'Jupiter', x: 1300, y: 0, vx: 0, vy: berechneOrbitSpeed(1300, sonne.m), r: 24, m: 100, color: 'brown' },
+    { name: 'Saturn', x: 1650, y: 0, vx: 0, vy: berechneOrbitSpeed(1650, sonne.m), r: 21, m: 90, color: 'brown' },
+    { name: 'Uranus', x: 2100, y: 0, vx: 0, vy: berechneOrbitSpeed(2100, sonne.m), r: 15, m: 70, color: 'blue' },
+    { name: 'Neptun', x: 2600, y: 0, vx: 0, vy: berechneOrbitSpeed(2600, sonne.m), r: 18, m: 80, color: 'blue' },
     { name: 'Pluto', x: 3200, y: 0, vx: 0, vy: berechneOrbitSpeed(3200, sonne.m), r: 10, m: 40, color: 'orange' }
   ];
 
@@ -93,13 +103,30 @@
       if (lastDist !== null) {
         const zoomChange = (dist - lastDist) * 0.001;
         zoom += zoomChange * zoom;
-        zoom = Math.max(0.02,zoom = Math.min(zoom, 2));
+        zoom = Math.max(0.02, Math.min(zoom, 2));
       }
       lastDist = dist;
     }
   }, { passive: false });
 
   canvas.addEventListener('touchend', () => lastDist = null);
+
+  const FIXED_TIMESTEP = 0.2;
+
+  function simulatePhysics() {
+    for (let p of planeten) {
+      const dx = 0 - p.x;
+      const dy = 0 - p.y;
+      const r = Math.sqrt(dx * dx + dy * dy);
+      const F = G * sonne.m * p.m / (r * r);
+      const ax = F * dx / r / p.m;
+      const ay = F * dy / r / p.m;
+      p.vx += ax * FIXED_TIMESTEP;
+      p.vy += ay * FIXED_TIMESTEP;
+      p.x += p.vx * FIXED_TIMESTEP;
+      p.y += p.vy * FIXED_TIMESTEP;
+    }
+  }
 
   function update() {
     const width = window.innerWidth;
@@ -110,61 +137,29 @@
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw sun
+    // Sonne zeichnen
     ctx.beginPath();
     ctx.arc(centerX, centerY, sonne.r * zoom, 0, Math.PI * 2);
     ctx.fillStyle = sonne.color;
     ctx.fill();
 
-    for (let p of planeten) {
-      if (!pausiert) {
-       const dx = -p.x;
-const dy = -p.y;
-const r2 = dx * dx + dy * dy;
-const r = Math.sqrt(r2);
-const invR3 = 1 / (r2 * r + 1e-6); // add small term to avoid divide-by-zero
-const ax = G * sonne.m * dx * invR3;
-const ay = G * sonne.m * dy * invR3;
-
-p.vx += ax * zeitfaktor;
-p.vy += ay * zeitfaktor;
-
-p.x += p.vx * zeitfaktor;
-p.y += p.vy * zeitfaktor;
-;
+    // Physik-Schritte je nach Zeitfaktor
+    if (!pausiert) {
+      const steps = Math.max(1, Math.floor(zeitfaktor));
+      for (let i = 0; i < steps; i++) {
+        simulatePhysics();
       }
+    }
 
+    for (let p of planeten) {
       const screenX = centerX + p.x * zoom;
       const screenY = centerY + p.y * zoom;
 
-      // Draw rings if present
-      if (p.rings) {
-        ctx.beginPath();
-        ctx.ellipse(screenX, screenY, p.r * 2.5 * zoom, p.r * zoom, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = p.rings.color;
-        ctx.lineWidth = p.rings.width * zoom;
-        ctx.stroke();
-      }
-
-      // Draw planet
       ctx.beginPath();
       ctx.arc(screenX, screenY, p.r * zoom, 0, Math.PI * 2);
       ctx.fillStyle = p.color;
       ctx.fill();
 
-      // Draw moons
-      if (p.moons) {
-        for (let m of p.moons) {
-          const moonX = screenX + m.x * zoom;
-          const moonY = screenY + m.y * zoom;
-          ctx.beginPath();
-          ctx.arc(moonX, moonY, m.r * zoom, 0, Math.PI * 2);
-          ctx.fillStyle = m.color;
-          ctx.fill();
-        }
-      }
-
-      // Optional: names & orbits
       if (zeigeNamen) {
         ctx.beginPath();
         ctx.arc(centerX, centerY, Math.sqrt(p.x * p.x + p.y * p.y) * zoom, 0, Math.PI * 2);
@@ -173,7 +168,7 @@ p.y += p.vy * zeitfaktor;
         ctx.stroke();
 
         ctx.fillStyle = 'white';
-        ctx.font = `${12}px sans-serif`;
+        ctx.font = `12px sans-serif`;
         ctx.textAlign = 'center';
         ctx.fillText(p.name, screenX, screenY - 10);
       }
@@ -185,7 +180,7 @@ p.y += p.vy * zeitfaktor;
   update();
 </script>
 
-<!-- Control Buttons -->
+<!-- Buttons -->
 <div style="position: fixed; top: 10px; left: 10px; color: white; font-family: sans-serif; z-index: 10;">
   <button onclick="zeitfaktor /= 2">🐢 Langsamer</button>
   <button onclick="zeitfaktor *= 2">⏩ Schneller</button>
@@ -226,3 +221,4 @@ p.y += p.vy * zeitfaktor;
 </script>
 </body>
 </html>
+
