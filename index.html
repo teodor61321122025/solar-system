@@ -18,6 +18,16 @@
     button {
       margin: 2px;
       font-size: 14px;
+      background-color: #222;
+      color: white;
+      border: 1px solid #444;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: sans-serif;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #333;
     }
   </style>
 </head>
@@ -29,7 +39,7 @@
   const ctx = canvas.getContext('2d');
 
   if (!ctx) {
-    alert("Fehler: Canvas konnte nicht initialisiert werden. Bitte in Safari oder Chrome öffnen.");
+    alert("Fehler: Canvas konnte nicht initialisiert werden.");
     throw new Error("Canvas context not supported.");
   }
 
@@ -101,35 +111,47 @@
 
   canvas.addEventListener('touchend', () => lastDist = null);
 
+  const FIXED_TIMESTEP = 0.2;
+
+  function simulatePhysics() {
+    for (let p of planeten) {
+      const dx = 0 - p.x;
+      const dy = 0 - p.y;
+      const r = Math.sqrt(dx * dx + dy * dy);
+      const F = G * sonne.m * p.m / (r * r);
+      const ax = F * dx / r / p.m;
+      const ay = F * dy / r / p.m;
+      p.vx += ax * FIXED_TIMESTEP;
+      p.vy += ay * FIXED_TIMESTEP;
+      p.x += p.vx * FIXED_TIMESTEP;
+      p.y += p.vy * FIXED_TIMESTEP;
+    }
+  }
+
   function update() {
     const width = window.innerWidth;
     const height = window.innerHeight;
     const centerX = width / 2;
     const centerY = height / 2;
 
-    ctx.fillStyle = 'black'; // Always paint background black
+    ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw sun
+    // Sonne zeichnen
     ctx.beginPath();
     ctx.arc(centerX, centerY, sonne.r * zoom, 0, Math.PI * 2);
     ctx.fillStyle = sonne.color;
     ctx.fill();
 
-    for (let p of planeten) {
-      if (!pausiert) {
-        const dx = 0 - p.x;
-        const dy = 0 - p.y;
-        const r = Math.sqrt(dx * dx + dy * dy);
-        const F = G * sonne.m * p.m / (r * r);
-        const ax = F * dx / r / p.m;
-        const ay = F * dy / r / p.m;
-        p.vx += ax * zeitfaktor;
-        p.vy += ay * zeitfaktor;
-        p.x += p.vx * zeitfaktor;
-        p.y += p.vy * zeitfaktor;
+    // Physik-Schritte je nach Zeitfaktor
+    if (!pausiert) {
+      const steps = Math.max(1, Math.floor(zeitfaktor));
+      for (let i = 0; i < steps; i++) {
+        simulatePhysics();
       }
+    }
 
+    for (let p of planeten) {
       const screenX = centerX + p.x * zoom;
       const screenY = centerY + p.y * zoom;
 
@@ -146,7 +168,7 @@
         ctx.stroke();
 
         ctx.fillStyle = 'white';
-        ctx.font = `${12}px sans-serif`;
+        ctx.font = `12px sans-serif`;
         ctx.textAlign = 'center';
         ctx.fillText(p.name, screenX, screenY - 10);
       }
