@@ -76,37 +76,21 @@
   }
 
   const planeten = [
-    // Zeichne Ringe (falls vorhanden)
-if (p.rings) {
-  ctx.beginPath();
-  ctx.ellipse(screenX, screenY, p.rings.outer * zoom, p.rings.outer * 0.4 * zoom, 0, 0, Math.PI * 2);
-  ctx.fillStyle = p.rings.color;
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(screenX, screenY, p.rings.inner * zoom, p.rings.inner * 0.4 * zoom, 0, 0, Math.PI * 2);
-  ctx.globalCompositeOperation = 'destination-out';
-  ctx.fill();
-  ctx.globalCompositeOperation = 'source-over';
-}
+  { name: 'Merkur', x: 400, y: 0, vx: 0, vy: berechneOrbitSpeed(400, sonne.m), r: 9, m: 10, color: 'grey' },
+  { name: 'Venus', x: 560, y: 0, vx: 0, vy: berechneOrbitSpeed(560, sonne.m), r: 11, m: 20, color: 'orange' },
+  { name: 'Erde', x: 760, y: 0, vx: 0, vy: berechneOrbitSpeed(760, sonne.m), r: 14, m: 30, color: 'blue' },
+  { name: 'Mars', x: 1000, y: 0, vx: 0, vy: berechneOrbitSpeed(1000, sonne.m), r: 11, m: 20, color: 'red' },
+  { name: 'Jupiter', x: 1300, y: 0, vx: 0, vy: berechneOrbitSpeed(1300, sonne.m), r: 24, m: 100, color: 'brown',
+    rings: { inner: 28, outer: 36, color: 'rgba(200,200,200,0.2)' } },
+  { name: 'Saturn', x: 1650, y: 0, vx: 0, vy: berechneOrbitSpeed(1650, sonne.m), r: 21, m: 90, color: 'goldenrod',
+    rings: { inner: 25, outer: 70, color: 'rgba(220,220,150,0.4)' } },
+  { name: 'Uranus', x: 2100, y: 0, vx: 0, vy: berechneOrbitSpeed(2100, sonne.m), r: 15, m: 70, color: 'lightblue',
+    rings: { inner: 18, outer: 30, color: 'rgba(180,220,255,0.2)' } },
+  { name: 'Neptun', x: 2600, y: 0, vx: 0, vy: berechneOrbitSpeed(2600, sonne.m), r: 18, m: 80, color: 'blue',
+    rings: { inner: 20, outer: 28, color: 'rgba(100,180,255,0.15)' } },
+  { name: 'Pluto', x: 3200, y: 0, vx: 0, vy: berechneOrbitSpeed(3200, sonne.m), r: 10, m: 40, color: 'orange' }
+];
 
-    { name: 'Merkur', x: 400, y: 0, vx: 0, vy: berechneOrbitSpeed(400, sonne.m), r: 9, m: 10, color: 'grey' },
-    { name: 'Venus', x: 560, y: 0, vx: 0, vy: berechneOrbitSpeed(560, sonne.m), r: 11, m: 20, color: 'orange' },
-    { name: 'Erde', x: 760, y: 0, vx: 0, vy: berechneOrbitSpeed(760, sonne.m), r: 14, m: 30, color: 'blue' },
-    { name: 'Mars', x: 1000, y: 0, vx: 0, vy: berechneOrbitSpeed(1000, sonne.m), r: 11, m: 20, color: 'red' },
-   { name: 'Jupiter', x: 1300, y: 0, vx: 0, vy: berechneOrbitSpeed(1300, sonne.m), r: 24, m: 100, color: 'brown',
-  rings: { inner: 28, outer: 36, color: 'rgba(200,200,200,0.2)' } },
-
-{ name: 'Saturn', x: 1650, y: 0, vx: 0, vy: berechneOrbitSpeed(1650, sonne.m), r: 21, m: 90, color: 'goldenrod',
-  rings: { inner: 25, outer: 70, color: 'rgba(220,220,150,0.4)' } },
-
-{ name: 'Uranus', x: 2100, y: 0, vx: 0, vy: berechneOrbitSpeed(2100, sonne.m), r: 15, m: 70, color: 'lightblue',
-  rings: { inner: 18, outer: 30, color: 'rgba(180,220,255,0.2)' } },
-
-{ name: 'Neptun', x: 2600, y: 0, vx: 0, vy: berechneOrbitSpeed(2600, sonne.m), r: 18, m: 80, color: 'blue',
-  rings: { inner: 20, outer: 28, color: 'rgba(100,180,255,0.15)' } },
-
-    { name: 'Pluto', x: 3200, y: 0, vx: 0, vy: berechneOrbitSpeed(3200, sonne.m), r: 10, m: 40, color: 'orange' }
-  ];
 
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
@@ -149,54 +133,65 @@ if (p.rings) {
     }
   }
 
-  function update() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const centerX = width / 2;
-    const centerY = height / 2;
+ function update() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const centerX = width / 2;
+  const centerY = height / 2;
 
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, width, height); // 👈 Use unscaled dimensions here
 
-    // Sonne zeichnen
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, sonne.r * zoom, 0, Math.PI * 2);
-    ctx.fillStyle = sonne.color;
-    ctx.fill();
 
-    // Physik-Schritte je nach Zeitfaktor
-    if (!pausiert) {
-      const steps = Math.max(1, Math.floor(zeitfaktor));
-      for (let i = 0; i < steps; i++) {
-        simulatePhysics();
-      }
+  // Sonne zeichnen
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, sonne.r * zoom, 0, Math.PI * 2);
+  ctx.fillStyle = sonne.color;
+  ctx.fill();
+
+  // Physik-Schritte je nach Zeitfaktor
+  if (!pausiert) {
+    const steps = Math.max(1, Math.floor(zeitfaktor));
+    for (let i = 0; i < steps; i++) {
+      simulatePhysics();
     }
+  }
 
-    for (let p of planeten) {
-      const screenX = centerX + p.x * zoom;
-      const screenY = centerY + p.y * zoom;
+  for (let p of planeten) {
+    const screenX = centerX + p.x * zoom;
+    const screenY = centerY + p.y * zoom;
 
+    // ✅ Draw rings if the planet has rings
+    if (p.rings) {
       ctx.beginPath();
-      ctx.arc(screenX, screenY, p.r * zoom, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
+      ctx.ellipse(screenX, screenY, p.rings.outer * zoom, p.rings.outer * 0.4 * zoom, 0, 0, Math.PI * 2);
+      ctx.fillStyle = p.rings.color;
       ctx.fill();
 
-      if (zeigeNamen) {
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, Math.sqrt(p.x * p.x + p.y * p.y) * zoom, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        ctx.fillStyle = 'white';
-        ctx.font = `12px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.fillText(p.name, screenX, screenY - 10);
-      }
+      ctx.beginPath();
+      ctx.ellipse(screenX, screenY, p.rings.inner * zoom, p.rings.inner * 0.4 * zoom, 0, 0, Math.PI * 2);
+      ctx.globalCompositeOperation = 'destination-out'; // Cut out inner part of the ring
+      ctx.fill();
+      ctx.globalCompositeOperation = 'source-over'; // Reset compositing
     }
 
-    requestAnimationFrame(update);
+    // Draw planet
+    ctx.beginPath();
+    ctx.arc(screenX, screenY, p.r * zoom, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.fill();
+
+    if (zeigeNamen) {
+      ctx.fillStyle = 'white';
+      ctx.font = `12px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(p.name, screenX, screenY - 10);
+    }
   }
+
+  requestAnimationFrame(update);
+}
+
 
   update();
 </script>
