@@ -118,16 +118,20 @@
 
     for (let p of planeten) {
       if (!pausiert) {
-        const dx = 0 - p.x;
-        const dy = 0 - p.y;
-        const r = Math.sqrt(dx * dx + dy * dy);
-        const F = G * sonne.m * p.m / (r * r);
-        const ax = F * dx / r / p.m;
-        const ay = F * dy / r / p.m;
-        p.vx += ax * zeitfaktor;
-        p.vy += ay * zeitfaktor;
-        p.x += p.vx * zeitfaktor;
-        p.y += p.vy * zeitfaktor;
+       const dx = -p.x;
+const dy = -p.y;
+const r2 = dx * dx + dy * dy;
+const r = Math.sqrt(r2);
+const invR3 = 1 / (r2 * r + 1e-6); // add small term to avoid divide-by-zero
+const ax = G * sonne.m * dx * invR3;
+const ay = G * sonne.m * dy * invR3;
+
+p.vx += ax * zeitfaktor;
+p.vy += ay * zeitfaktor;
+
+p.x += p.vx * zeitfaktor;
+p.y += p.vy * zeitfaktor;
+;
       }
 
       const screenX = centerX + p.x * zoom;
