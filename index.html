@@ -171,13 +171,13 @@ function generiereSterne(breite, hoehe, anzahl) {
     sterne.push({
       x: Math.random() * breite,
       y: Math.random() * hoehe,
-      r: Math.random() * 1.5,
+      r: Math.random() * 0.6,
       a: Math.random() * 0.5 + 0.3
     });
   }
 }
 
-generiereSterne(canvas.width, canvas.height, 5000);
+generiereSterne(canvas.width, canvas.height, 15000);
 
 
 
@@ -220,20 +220,43 @@ for (let i = 0; i < 40; i++) { // Weniger Flecken
 // Asteroidengürtel zwischen Mars und Jupiter
 const asteroidengürtel = [];
 function generiereAsteroiden() {
-  const anzahl = 500; // Anzahl der Asteroiden
+  const anzahl = 1000;
+
   for (let i = 0; i < anzahl; i++) {
-    const abstand = 1200 + Math.random() * 200; // Position zwischen Mars und Jupiter
+    const abstand = 1100 + Math.pow(Math.random(), 1.7) * 500;
+    const exzentrizität = 0.01 + Math.random() * 0.03;
     const winkel = Math.random() * 2 * Math.PI;
-    const radius = Math.random() * 5 + 1; // Zufällige Größe der Asteroiden
-    asteroidengürtel.push({
-      x: abstand * Math.cos(winkel),
-      y: abstand * Math.sin(winkel),
-      r: radius,
-      vx: Math.random() * 0.2 - 0.1, // Zufällige Geschwindigkeit in X-Richtung
-      vy: Math.random() * 0.2 - 0.1  // Zufällige Geschwindigkeit in Y-Richtung
-    });
+  const radius = Math.pow(Math.random(), 2.5) * 2.5 + 0.3; 
+
+
+    const aX = abstand * (1 - exzentrizität) * Math.cos(winkel);
+    const aY = abstand * (1 + exzentrizität) * Math.sin(winkel);
+
+    const orbitalSpeed = berechneOrbitSpeed(abstand, sonne.m);
+    const vx = -orbitalSpeed * Math.sin(winkel);
+    const vy =  orbitalSpeed * Math.cos(winkel);
+
+    //  Asteroidentyp auswählen
+    const typZufall = Math.random();
+    let typ, farbe;
+
+    if (typZufall < 0.75) {
+      typ = 'C';
+      farbe = `rgba(50, 50, 50, ${0.4 + Math.random() * 0.3})`; // dunkelgrau
+    } else if (typZufall < 0.92) {
+      typ = 'S';
+      farbe = `rgba(160, 140, 120, ${0.5 + Math.random() * 0.4})`; // rötlich/grau
+    } else {
+      typ = 'M';
+      farbe = `rgba(180, 180, 180, ${0.5 + Math.random() * 0.3})`; // silbrig
+    }
+
+    asteroidengürtel.push({ x: aX, y: aY, r: radius, vx, vy, typ, farbe });
   }
 }
+
+
+generiereAsteroiden(); // <- ruft die Funktion einmalig auf
 
     canvas.addEventListener('wheel', e => {
       e.preventDefault();
@@ -260,19 +283,20 @@ function generiereAsteroiden() {
 
     const FIXED_TIMESTEP = 0.2;
     function simulatePhysics() {
-      for (let p of planeten) {
-        const dx = 0 - p.x;
-        const dy = 0 - p.y;
-        const r = Math.sqrt(dx * dx + dy * dy);
-        const F = G * sonne.m * p.m / (r * r);
-        const ax = F * dx / r / p.m;
-        const ay = F * dy / r / p.m;
-        p.vx += ax * FIXED_TIMESTEP;
-        p.vy += ay * FIXED_TIMESTEP;
-        p.x += p.vx * FIXED_TIMESTEP;
-        p.y += p.vy * FIXED_TIMESTEP;
-      }
-    }
+  for (let obj of [...planeten, ...asteroidengürtel]) {
+    const dx = 0 - obj.x;
+    const dy = 0 - obj.y;
+    const r = Math.sqrt(dx * dx + dy * dy);
+    const F = G * sonne.m * obj.r / (r * r); // Achtung: hier vielleicht besser obj.m!
+    const ax = F * dx / r / obj.r;
+    const ay = F * dy / r / obj.r;
+    obj.vx += ax * FIXED_TIMESTEP;
+    obj.vy += ay * FIXED_TIMESTEP;
+    obj.x += obj.vx * FIXED_TIMESTEP;
+    obj.y += obj.vy * FIXED_TIMESTEP;
+  }
+}
+
 function update() {
   const width = window.innerWidth;
   const height = window.innerHeight;
@@ -284,6 +308,7 @@ letzteEchtzeit = jetzt;
 
 if (!pausiert) {
   simMillis += delta * zeitfaktor;
+  aktualisiereAsteroiden();
 }
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -405,6 +430,8 @@ function zeichneMehrschichtCorona(ctx, zoom) {
       for (let p of planeten) {
         const screenX = centerX + p.x * zoom;
         const screenY = centerY + p.y * zoom;
+        zeichneAsteroiden(ctx); // <- Asteroiden sichtbar machen
+
 
         // Ringe
         if (['Jupiter', 'Saturn', 'Uranus', 'Neptun'].includes(p.name)) {
@@ -427,29 +454,41 @@ function zeichneMehrschichtCorona(ctx, zoom) {
         ctx.fillStyle = p.color;
         ctx.fill();
 
-        if (zeigeNamen) {
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, Math.sqrt(p.x * p.x + p.y * p.y) * zoom, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-          ctx.lineWidth = 1;
-          ctx.stroke();
-          ctx.fillStyle = 'white';
-          ctx.font = `9px sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.fillText(p.name, screenX, screenY - 10);
-        }
-      }
+      if (zeigeNamen && p.name) {
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, Math.sqrt(p.x * p.x + p.y * p.y) * zoom, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = 'white';
+  ctx.font = `9px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText(p.name, screenX, screenY - 10);
+}
+}
 // Asteroiden auf der Leinwand zeichnen
 function zeichneAsteroiden(ctx) {
   for (let a of asteroidengürtel) {
     const screenX = centerX + a.x * zoom;
     const screenY = centerY + a.y * zoom;
+    
+    const winkel = Math.random() * Math.PI;
+    const rx = a.r * zoom * (0.8 + Math.random() * 0.4);  // leicht gestreckt
+    const ry = a.r * zoom * (0.8 + Math.random() * 0.4);
+
+    ctx.save();
+    ctx.translate(screenX, screenY);
+    ctx.rotate(winkel);
     ctx.beginPath();
-    ctx.arc(screenX, screenY, a.r * zoom, 0, Math.PI * 2);
-    ctx.fillStyle = 'gray'; // Asteroidenfarbe
+    ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fillStyle = a.farbe;
     ctx.fill();
+    ctx.restore();
   }
 }
+
+
+
 
       requestAnimationFrame(update);
     }
@@ -492,7 +531,7 @@ function zeichneAsteroiden(ctx) {
   </script>
 </body>
 </html>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ctx.save(); ctx.shadowColor = 'yellow'; ctx.shadowBlur = 40; ctx.beginPath(); ctx.arc(centerX, centerY, sonne.r * zoom, 0, Math.PI * 2); ctx.fillStyle = sonne.color; ctx.fill(); ctx.restore(); if (!pausiert) { const steps = Math.max(1, Math.floor(zeitfaktor)); for (let i = 0; i < steps; i++) { simulatePhysics(); } } for (let p of planeten) { const screenX = centerX + p.x * zoom; const screenY = centerY + p.y * zoom; 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ctx.save(); ctx.shadowColor = 'yellow'; ctx.shadowBlur = 40; ctx.beginPath(); ctx.arc(centerX, centerY, sonne.r * zoom, 0, Math.PI * 2); ctx.fillStyle = sonne.color; ctx.fill(); ctx.restore(); if (!pausiert) { const steps = Math.max(1, Math.floor(zeitfaktor)); for (let i = 0; i < steps; i++) { simulatePhysics(); } } for (let p of planeten) { const screenX = centerX + p.x * zoom; const screenY = centerY + p.y * zoom; 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              // Ringe
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              if (['Jupiter', 'Saturn', 'Uranus', 'Neptun'].includes(p.name)) { ctx.beginPath(); let ringBreiteFaktor = 2.0; let ringDicke = 4; let ringFarbe = 'rgba(255,255,255,0.3)'; if (p.name === 'Jupiter') { ringFarbe = 'rgba(255, 200, 200, 0.3)'; ringBreiteFaktor = 1.8; ringDicke = 2; } else if (p.name === 'Saturn') { ringFarbe = 'rgba(240, 220, 180, 0.5)'; ringBreiteFaktor = 3.5; ringDicke = 6; } else if (p.name === 'Uranus') { ringFarbe = 'rgba(150, 150, 150, 0.4)'; ringBreiteFaktor = 2.2; ringDicke = 2; } else if (p.name === 'Neptun') { ringFarbe = 'rgba(100, 100, 100, 0.4)'; ringBreiteFaktor = 2.0; ringDicke = 2; } ctx.ellipse( screenX, screenY, p.r * zoom * ringBreiteFaktor, p.r * zoom * 0.4, 0, 0, Math.PI * 2 ); ctx.strokeStyle = ringFarbe; ctx.lineWidth = ringDicke * zoom; ctx.stroke(); } 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              // Planetenkörper
