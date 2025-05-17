@@ -135,7 +135,12 @@ function generiereSterne(anzahl) {
 
 function zeichneSterne(ctx) {
   ctx.save();
-  ctx.resetTransform(); // wichtig, damit die Sterne fest im Hintergrund bleiben
+  if (typeof ctx.resetTransform === 'function') {
+  ctx.resetTransform();
+} else {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // Fallback
+}
+
   for (const s of sterne) {
     ctx.beginPath();
     ctx.arc(s.x, s.y, s.r, 0, 2 * Math.PI);
