@@ -533,6 +533,12 @@ function zeichneAsteroiden(ctx) {
     setInterval(() => {
       document.getElementById('pauseText').textContent = pausiert ? 'Start' : 'Pause';
     }, 100);
+    function loop() {
+  update();
+  requestAnimationFrame(loop);
+}
+loop();
+
   </script>
 </body>
 </html>
