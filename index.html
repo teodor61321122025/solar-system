@@ -62,10 +62,18 @@ function generiereProtuberanz() {
 }
 
 
-// Regelmäßiges Erzeugen neuer Protuberanzen
+// Animation Loop
+function loop() {
+  update();
+  requestAnimationFrame(loop);
+}
+loop();
+
+// Protuberanzen regelmäßig erzeugen
 setInterval(() => {
   if (protuberanzen.length < 15) generiereProtuberanz();
 }, 1500);
+
 
 // Zeichenfunktion
 function drawProtuberanzen(ctx, zoom, sonne) {
