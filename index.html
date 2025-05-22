@@ -182,7 +182,7 @@ function generiereSterne(breite, hoehe, anzahl) {
   }
 }
 
-generiereSterne(canvas.width, canvas.height, 5000);
+generiereSterne(canvas.width, canvas.height, 3000);
 
 
 
@@ -225,7 +225,7 @@ for (let i = 0; i < 40; i++) { // Weniger Flecken
 // Asteroidengürtel zwischen Mars und Jupiter
 const asteroidengürtel = [];
 function generiereAsteroiden() {
-  const anzahl = 200;
+  const anzahl = 100;
 
   for (let i = 0; i < anzahl; i++) {
     const abstand = 1100 + Math.pow(Math.random(), 1.7) * 500;
